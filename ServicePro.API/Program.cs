@@ -102,8 +102,7 @@ app.UseAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ServicePro API v1");
-    c.RoutePrefix = "swagger";
+    c.InjectJavascript("/swagger-fix-admin.js");
 });
 
 app.MapControllers();
