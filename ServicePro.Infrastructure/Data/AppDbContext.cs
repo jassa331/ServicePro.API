@@ -15,5 +15,7 @@ namespace ServicePro.Infrastructure.Data
             : base(options) { }
 
         public DbSet<Customer> Customers => Set<Customer>();
+        public DbSet<User> Users { get; set; }
+
     }
 }
