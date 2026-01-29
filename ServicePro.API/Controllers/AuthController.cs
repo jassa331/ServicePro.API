@@ -15,7 +15,7 @@ namespace ServicePro.API.Controllers
         //add comment test
             this.authService = authService;
         }
-
+        [HttpPost]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDto dto)
         {
