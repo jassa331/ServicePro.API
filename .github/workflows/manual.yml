@@ -32,16 +32,17 @@ jobs:
           dotnet-version: '8.0.x'
 
       # 4️⃣ Restore (PROJECT only)
+           # 4️⃣ Restore (PROJECT only)
       - name: Restore dependencies
-        run: dotnet restore WebApplication22/WebApplication22.csproj
+        run: dotnet restore ServicePro.API/ServicePro.API.csproj
 
       # 5️⃣ Build
       - name: Build project
-        run: dotnet build WebApplication22/WebApplication22.csproj -c Release --no-restore
+        run: dotnet build ServicePro.API/ServicePro.API.csproj -c Release --no-restore
 
       # 6️⃣ Publish (PROJECT only)
       - name: Publish project
-        run: dotnet publish WebApplication22/WebApplication22.csproj -c Release -o publish
+        run: dotnet publish ServicePro.API/ServicePro.API.csproj -c Release -o publish
 
       # 🔥 6.1️⃣ Force IIS Restart (web.config touch)
       - name: Trigger IIS Restart
