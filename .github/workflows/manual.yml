@@ -1,0 +1,61 @@
+name: Manual Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Environment
+      - name: Show selected environment
+        run: echo "Deploying to ${{ github.event.inputs.environment }}"
+
+      # 3️⃣ Setup .NET 8 SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 4️⃣ Restore (PROJECT only)
+      - name: Restore dependencies
+        run: dotnet restore WebApplication22/WebApplication22.csproj
+
+      # 5️⃣ Build
+      - name: Build project
+        run: dotnet build WebApplication22/WebApplication22.csproj -c Release --no-restore
+
+      # 6️⃣ Publish (PROJECT only)
+      - name: Publish project
+        run: dotnet publish WebApplication22/WebApplication22.csproj -c Release -o publish
+
+      # 🔥 6.1️⃣ Force IIS Restart (web.config touch)
+      - name: Trigger IIS Restart
+        run: |
+          echo "<!-- restart $(date) -->" >> publish/web.config
+
+      # 7️⃣ Deploy FULL APP (NOT only wwwroot)
+      - name: Deploy to MonsterASP.NET
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./publish/
+          server-dir: /
+          dangerous-clean-slate: false
+          log-level: verbose
