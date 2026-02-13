@@ -32,6 +32,15 @@ namespace ServicePro.API.Controllers
             var result = await _service.GetAllProductsAsync();
             return Ok(result);
         }
+        [AllowAnonymous]
+        [HttpGet("by-category")]
+        public async Task<IActionResult> GetProductsByCategory()
+        {
+            var result = await _service.GetProductsByCategoryAsync();
+            return Ok(result);
+        }
+
+
     }
 
 }
