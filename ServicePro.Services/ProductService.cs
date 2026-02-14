@@ -81,6 +81,32 @@ namespace ServicePro.Services
                     ImageUrls = p.ProductImages.Select(x => x.ImageUrl).ToList()
                 }).ToListAsync();
         }
+        public async Task<List<CategoryWithProductsDTO>> GetProductsByCategoryAsync()
+        {
+            var products = await _context.Products
+                         .Include(p => p.ProductImages)
+                         .Where(p => p.IsActive)
+                         .ToListAsync();
+
+
+            return products
+                .GroupBy(p => p.Category)
+                .Select(group => new CategoryWithProductsDTO
+                {
+                    Category = group.Key,
+                    Products = group.Select(p => new ProductResponseDTO
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Price = p.Price,
+                        Category = p.Category,
+                        ImageUrls = p.ProductImages.Select(i => i.ImageUrl).ToList()
+                    }).ToList()
+                })
+                .ToList();
+        }
+
+
     }
 
 }

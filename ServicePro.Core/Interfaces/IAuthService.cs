@@ -1,10 +1,10 @@
-﻿using System;
+﻿using ServicePro.Core.DTOs;
+using ServicePro.Core.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using ServicePro.Core.DTOs;
 
 namespace ServicePro.Core.Interfaces
 {
@@ -12,6 +12,7 @@ namespace ServicePro.Core.Interfaces
     {
         Task RegisterAsync(RegisterRequestDto dto);
         Task<string> LoginAsync(LoginDto dto);
+        Task<User> GetProfileAsync(string email);
     }
 }
 

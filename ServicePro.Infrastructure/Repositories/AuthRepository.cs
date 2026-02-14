@@ -54,8 +54,11 @@ namespace ServicePro.Infrastructure.Repositories
                 Name = reader["Name"].ToString(),
                 Email = reader["Email"].ToString(),
                 PasswordHash = reader["PasswordHash"].ToString(),
-                Role = reader["Role"].ToString()
+                Role = reader["Role"].ToString(),
+                PhoneNumber = reader["PhoneNumber"].ToString()
             };
         }
+
+
     }
 }

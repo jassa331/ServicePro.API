@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ServicePro.Core.DTOs;
 using ServicePro.Core.Interfaces;
+using System.Security.Claims;
 
 namespace ServicePro.API.Controllers
 {
@@ -12,31 +14,46 @@ namespace ServicePro.API.Controllers
 
         public AuthController(IAuthService authService)
         {
-        //add comment test
+            //add comment test
             this.authService = authService;
         }
         [HttpPost]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDto dto)
         {
-            try { 
-            if (dto == null)
+            try
             {
-                return BadRequest("please enter valid Candenstials ");
+                if (dto == null)
+                {
+                    return BadRequest("please enter valid Candenstials ");
+                }
+                await authService.RegisterAsync(dto);
+                return Ok("User registered successfully");
             }
-            await authService.RegisterAsync(dto);
-            return Ok("User registered successfully");
-            }
-            
-            catch(Exception ex){
+
+            catch (Exception ex)
+            {
                 return BadRequest("something went wrong ");
-            } }
-        
+            }
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
             var token = await authService.LoginAsync(dto);
             return Ok(new { token });
         }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<IActionResult> GetProfile()
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+            var profile = await authService.GetProfileAsync(email);
+
+            return Ok(profile);
+        }
+
     }
 }
