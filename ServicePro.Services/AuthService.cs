@@ -86,5 +86,15 @@ namespace ServicePro.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public async Task<User> GetProfileAsync(string email)
+        {
+            var user = await repository.GetUserByEmailAsync(email);
+
+            if (user == null)
+                throw new Exception("User not found");
+
+            return user;
+        }
+
     }
 }
