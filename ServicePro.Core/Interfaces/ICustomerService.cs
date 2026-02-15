@@ -10,5 +10,6 @@ namespace ServicePro.Core.Interfaces
     public interface ICustomerService
     {
         Task<List<Customer>> GetCustomersAsync();
+
     }
 }
