@@ -43,7 +43,7 @@ namespace ServicePro.API.Controllers
             var token = await authService.LoginAsync(dto);
             return Ok(new { token });
         }
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpGet("profile")]
         [Authorize]
         public async Task<IActionResult> GetProfile()
