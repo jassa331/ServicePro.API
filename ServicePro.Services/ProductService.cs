@@ -100,7 +100,8 @@ namespace ServicePro.Services
                         Name = p.Name,
                         Price = p.Price,
                         Category = p.Category,
-                        ImageUrls = p.ProductImages.Select(i => i.ImageUrl).ToList()
+                        ImageUrls = p.ProductImages.Select(i => i.ImageUrl).ToList(),
+                        Description = p.Description
                     }).ToList()
                 })
                 .ToList();

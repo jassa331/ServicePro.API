@@ -13,6 +13,7 @@ namespace ServicePro.Core.DTOs
         public decimal Price { get; set; }
         public string Category { get; set; }
         public List<string> ImageUrls { get; set; }
+        public string Description { get; set; }
     }
 
 }
