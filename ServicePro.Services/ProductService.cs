@@ -78,7 +78,8 @@ namespace ServicePro.Services
                     Name = p.Name,
                     Price = p.Price,
                     Category = p.Category,
-                    ImageUrls = p.ProductImages.Select(x => x.ImageUrl).ToList()
+                    ImageUrls = p.ProductImages.Select(x => x.ImageUrl).ToList(),
+                    Description = p.Description
                 }).ToListAsync();
         }
         public async Task<List<CategoryWithProductsDTO>> GetProductsByCategoryAsync()
