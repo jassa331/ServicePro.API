@@ -13,6 +13,8 @@ namespace ServicePro.Core.Interfaces
         Task<List<ProductResponseDTO>> GetAllProductsAsync();
         Task<List<CategoryWithProductsDTO>> GetProductsByCategoryAsync();
 
+        Task<List<Alltabledataforlisting>> GetAllProductsAsyncbyproductsandimageid();
+
     }
 
 }

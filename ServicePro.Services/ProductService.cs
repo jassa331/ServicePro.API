@@ -78,9 +78,41 @@ namespace ServicePro.Services
                     Name = p.Name,
                     Price = p.Price,
                     Category = p.Category,
-                    ImageUrls = p.ProductImages.Select(x => x.ImageUrl).ToList()
+                    ImageUrls = p.ProductImages.Select(x => x.ImageUrl).ToList(),
+                    Description = p.Description
                 }).ToListAsync();
         }
+        public async Task<List<Alltabledataforlisting>> GetAllProductsAsyncbyproductsandimageid()
+        {
+            var products = await _context.Products
+                .Include(p => p.ProductImages)
+                .ToListAsync();
+
+            var result = products.Select(p => new Alltabledataforlisting
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                Category = p.Category,
+                IsActive = p.IsActive,
+                CreatedAt = p.CreatedAt,
+                UpdatedAt = p.UpdatedAt,
+
+                ProductImages = p.ProductImages.Select(img => new ProductImageDto
+                {
+                    Id = img.Id,
+                    ProductId = img.ProductId,
+                    ImageUrl = img.ImageUrl,
+                    PublicId = img.PublicId,
+                    CreatedAt = img.CreatedAt
+                }).ToList()
+            }).ToList();
+
+            return result;
+        }
+
+
         public async Task<List<CategoryWithProductsDTO>> GetProductsByCategoryAsync()
         {
             var products = await _context.Products
