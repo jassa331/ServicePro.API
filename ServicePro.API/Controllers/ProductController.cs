@@ -24,7 +24,13 @@ namespace ServicePro.API.Controllers
             var result = await _service.CreateProductAsync(dto);
             return Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
+        [HttpGet("get-all-products-for=listing")]
+        public async Task<IActionResult> GetAllProductsForListing()
+        {
+            var result = await _service.GetAllProductsAsyncbyproductsandimageid();
+            return Ok(result);
+        }
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetProducts()

@@ -1,5 +1,6 @@
-﻿using ServicePro.Core.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using ServicePro.Core.DTOs;
+using ServicePro.Core.Entities;
 using ServicePro.Core.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,8 @@ namespace ServicePro.Infrastructure.Data
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
         public DbSet<Contact> Contacts { get; set; }
+        public DbSet<Alltabledataforlisting> products { get; set; }
+
 
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<User> Users { get; set; }
