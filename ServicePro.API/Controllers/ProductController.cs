@@ -25,6 +25,20 @@ namespace ServicePro.API.Controllers
             return Ok(result);
         }
         [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(Guid id, [FromForm] uupdateProductDTO dto)
+        {
+            var result = await _service.UpdateProductAsync(id, dto);
+            return Ok(result);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("update-single-image")]
+        public async Task<IActionResult> UpdateSingleImage([FromForm] UpdateSingleImageDTO dto)
+        {
+            var result = await _service.UpdateSingleImageAsync(dto);
+            return Ok(result);
+        }
+        [Authorize(Roles = "Admin")]
         [HttpGet("get-all-products-for=listing")]
         public async Task<IActionResult> GetAllProductsForListing()
         {

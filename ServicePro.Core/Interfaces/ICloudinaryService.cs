@@ -10,6 +10,7 @@ namespace ServicePro.Core.Interfaces
     public interface ICloudinaryService
     {
         Task<(string url, string publicId)> UploadImageAsync(IFormFile file);
+        Task DeleteImageAsync(string publicId);
     }
 
 }

@@ -26,7 +26,11 @@ namespace ServicePro.Services
 
             _cloudinary = new Cloudinary(acc);
         }
-
+        public async Task DeleteImageAsync(string publicId)
+        {
+            var deleteParams = new DeletionParams(publicId);
+            await _cloudinary.DestroyAsync(deleteParams);
+        }
         public async Task<(string url, string publicId)> UploadImageAsync(IFormFile file)
         {
             using var stream = file.OpenReadStream();

@@ -139,7 +139,83 @@ namespace ServicePro.Services
                 .ToList();
         }
 
+        public async Task<ProductResponseDTO> UpdateProductAsync(Guid id, uupdateProductDTO dto)
+        {
+            var product = await _context.Products
+                .Include(p => p.ProductImages)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
+            if (product == null)
+                throw new Exception("Product not found");
+
+            // 🔹 Update basic fields
+            product.Name = dto.Name;
+            product.Description = dto.Description;
+            product.Price = dto.Price;
+            product.Category = dto.Category;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            // 🔹 DELETE OLD IMAGES FROM CLOUDINARY + DB
+            foreach (var image in product.ProductImages)
+            {
+                await _cloudinary.DeleteImageAsync(image.PublicId);
+            }
+
+            _context.ProductImages.RemoveRange(product.ProductImages);
+
+            // 🔹 Upload new images
+            foreach (var file in dto.Images)
+            {
+                var uploadResult = await _cloudinary.UploadImageAsync(file);
+
+                var newImage = new ProductImage
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
+                    ImageUrl = uploadResult.url,
+                    PublicId = uploadResult.publicId,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.ProductImages.Add(newImage);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return new ProductResponseDTO
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Category = product.Category,
+                ImageUrls = product.ProductImages
+                    .Select(x => x.ImageUrl)
+                    .ToList()
+            };
+        }
+
+
+        public async Task<string> UpdateSingleImageAsync(UpdateSingleImageDTO dto)
+        {
+            var image = await _context.ProductImages
+                .FirstOrDefaultAsync(x => x.Id == dto.ProductImageId
+                                       && x.ProductId == dto.ProductId);
+
+            if (image == null)
+                throw new Exception("Image not found");
+
+            await _cloudinary.DeleteImageAsync(image.PublicId);
+
+            var uploadResult = await _cloudinary.UploadImageAsync(dto.NewImage);
+
+            image.ImageUrl = uploadResult.url;
+            image.PublicId = uploadResult.publicId;
+            image.CreatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return "Image updated successfully";
+        }
     }
-
 }
