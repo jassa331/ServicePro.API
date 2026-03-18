@@ -72,7 +72,7 @@ jobs:
           /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Strong!Passw0rd" -d CS360Database_Test -Q "SELECT * FROM tSQLt.TestResult;" > test-results.txt
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: test-results.txt
