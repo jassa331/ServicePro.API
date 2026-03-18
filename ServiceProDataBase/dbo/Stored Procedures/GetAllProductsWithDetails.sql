@@ -8,7 +8,7 @@ BEGIN
         p.Price,
         p.Category,
         p.Description,
-
+        --alter
         -- Images
         pi.Id AS ImageId,
         pi.ProductId,

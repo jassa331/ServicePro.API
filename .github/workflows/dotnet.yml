@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - Production
-  workflow_dispatch:   # manual run option
+  workflow_dispatch:
 
 jobs:
   build:
@@ -57,14 +57,32 @@ jobs:
         sudo apt-get update
         sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
 
+    # 9. Run DB Scripts Safely
     - name: Run DB Scripts Safely
       run: |
         set -e
-        for file in ServicePro.API/database/scripts/*.sql
-        do
-          echo "Running $file"
-          /opt/mssql-tools/bin/sqlcmd -b -S $DB_SERVER -U $DB_USER -P $DB_PASS -d $DB_NAME -i $file
+
+        echo "Listing SQL files..."
+        ls -l database/scripts || echo "Folder not found"
+
+        found=false
+
+        for file in database/scripts/*.sql; do
+          if [ -f "$file" ]; then
+            found=true
+            echo "Running $file"
+            /opt/mssql-tools/bin/sqlcmd -b \
+              -S $DB_SERVER \
+              -U $DB_USER \
+              -P $DB_PASS \
+              -d $DB_NAME \
+              -i "$file"
+          fi
         done
+
+        if [ "$found" = false ]; then
+          echo "No SQL files found. Skipping DB step."
+        fi
       env:
         DB_SERVER: ${{ secrets.DB_SERVER }}
         DB_USER: ${{ secrets.DB_USER }}
