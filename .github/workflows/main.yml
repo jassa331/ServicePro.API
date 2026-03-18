@@ -23,9 +23,9 @@ jobs:
           - 1433:1433
         env:
           ACCEPT_EULA: "Y"
-          SA_PASSWORD: "X%n3@4Wp7Pj+"  # Must meet SQL Server password policy
+          SA_PASSWORD: 'Xn3@4Wp7Pj+'  # Avoid % and other YAML-breaking chars
         options: >-
-          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'X%n3@4Wp7Pj+' -Q 'SELECT 1'"
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -Q 'SELECT 1'"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 15
@@ -35,40 +35,45 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Wait for SQL Server to be ready
-        run: sleep 40
+        run: |
+          echo "Waiting for SQL Server to start..."
+          for i in {1..30}; do
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -Q 'SELECT 1' && break
+            sleep 5
+          done
 
       - name: Create test database
         run: |
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -Q "CREATE DATABASE CS360Database_Test;"
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -Q "CREATE DATABASE CS360Database_Test;"
 
       - name: Load tables
         run: |
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./dbo/Tables/Tables1/Countries.sql
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./dbo/Tables/Tables2/States.sql
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./dbo/Tables/Tables1/Cities.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./dbo/Tables/Tables1/Countries.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./dbo/Tables/Tables2/States.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./dbo/Tables/Tables1/Cities.sql
 
       - name: Load stored procedures
         run: |
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./dbo/StoredProcedures/Procs4/Profile_GetAllDistinctCities.sql
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./dbo/StoredProcedures/Procs4/Profile_GetCountryStateId.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./dbo/StoredProcedures/Procs4/Profile_GetAllDistinctCities.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./dbo/StoredProcedures/Procs4/Profile_GetCountryStateId.sql
 
       - name: Install tSQLt
         run: |
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./tSQLt_Install.sql
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./tSQLt.class.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./tSQLt_Install.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./tSQLt.class.sql
 
       - name: Load tests
         run: |
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./Tests/ProfileGetAllDistinctCities_Tests.sql
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -i ./Tests/ProfileGetCountryStateId_Tests.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./Tests/ProfileGetAllDistinctCities_Tests.sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -i ./Tests/ProfileGetCountryStateId_Tests.sql
 
       - name: Run all tests
         run: |
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -Q "EXEC tSQLt.RunAll;"
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -Q "EXEC tSQLt.RunAll;"
 
       - name: Export test results
         run: |
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "X%n3@4Wp7Pj+" -d CS360Database_Test -Q "SET NOCOUNT ON; SELECT * FROM tSQLt.TestResult;" > test-results.txt
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Xn3@4Wp7Pj+' -d CS360Database_Test -Q "SET NOCOUNT ON; SELECT * FROM tSQLt.TestResult;" > test-results.txt
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
