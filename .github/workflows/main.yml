@@ -3,12 +3,15 @@ name: CI – tSQLt Unit Tests
 on:
   push:
     branches:
-      - main
+      - master
       - development
+      - Production
   pull_request:
     branches:
-      - main
+      - master
       - development
+      - Production
+
 
 jobs:
   test-sql:
