@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace ServicePro.Core.DTOs
 {
-    public class LoginDto
+    public class UpdateProductStatusDto
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Captcha { get; set; }   
-
+        public bool IsActive { get; set; }
     }
 }

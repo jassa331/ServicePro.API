@@ -2,14 +2,23 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 using ServicePro.Core.Interfaces;
 using ServicePro.Infrastructure.Data;
 using ServicePro.Infrastructure.Repositories;
 using ServicePro.Services;
 using System.Text;
 
+//add this to enable IIS synchronous IO for QuestPDF
 var builder = WebApplication.CreateBuilder(args);
+// ================= QUESTPDF CONFIG =================
+QuestPDF.Settings.License = LicenseType.Community;
+QuestPDF.Settings.CheckIfAllTextGlyphsAreAvailable = false;
 
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.AllowSynchronousIO = true;
+});
 // ================= DATABASE =================
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Service")));
@@ -19,7 +28,10 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ICustomerService, CustomerService>();
-
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IPdfService, PdfService>();
 // ================= JWT AUTH =================
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
@@ -91,7 +103,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
+var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+app.Run($"http://0.0.0.0:{port}");
 app.UseHttpsRedirection();
 app.UseCors("AllowReact");
 
@@ -103,7 +116,7 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.InjectJavascript("/swagger-fix-admin.js");
-});
+}); //dotnet sln add ServicePro.API/ServicePro.API.csprojdotnet sln list
 
 app.MapControllers();
 app.Run();

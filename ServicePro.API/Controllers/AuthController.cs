@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ServicePro.Core.DTOs;
 using ServicePro.Core.Interfaces;
+using System.Security.Claims;
 
 namespace ServicePro.API.Controllers
 {
@@ -12,31 +14,46 @@ namespace ServicePro.API.Controllers
 
         public AuthController(IAuthService authService)
         {
-        //add comment test
+            //add comment test
             this.authService = authService;
         }
         [HttpPost]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequestDto dto)
         {
-            try { 
-            if (dto == null)
+            try
             {
-                return BadRequest("please enter valid Candenstials ");
+                if (dto == null)
+                {
+                    return BadRequest("please enter valid Candenstials ");
+                }
+                await authService.RegisterAsync(dto);
+                return Ok("User registered successfully");
             }
-            await authService.RegisterAsync(dto);
-            return Ok("User registered successfully");
-            }
-            
-            catch(Exception ex){
+
+            catch (Exception ex)
+            {
                 return BadRequest("something went wrong ");
-            } }
-        
+            }
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var token = await authService.LoginAsync(dto);
-            return Ok(new { token });
+            try
+            {
+                var token = await authService.LoginAsync(dto);
+                return Ok(new { token });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Something went wrong");
+            }
         }
+
     }
 }

@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace ServicePro.Core.DTOs
 {
-    public class LoginDto
+    public class ContactDto
     {
+        public string Name { get; set; }
+        public string PhoneNumber { get; set; }
         public string Email { get; set; }
-        public string Password { get; set; }
-        public string Captcha { get; set; }   
-
+        public string Product { get; set; }
+        public string Message { get; set; }
     }
 }

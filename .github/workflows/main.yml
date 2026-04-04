@@ -1,0 +1,55 @@
+name: CI – tSQLt Unit Tests
+
+on:
+  push:
+    branches: [master, development, Production]
+  pull_request:
+    branches: [master, development, Production]
+
+jobs:
+  test-sql:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          SA_PASSWORD: "Test@1234Pass!"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Test@1234Pass!' -Q 'SELECT 1'" 
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 30
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Wait for SQL Server to start
+        run: |
+          echo "Waiting for SQL Server to start..."
+          for i in {1..30}; do
+            docker exec $(docker ps -qf "ancestor=mcr.microsoft.com/mssql/server:2022-latest") \
+              /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Test@1234Pass!" -Q "SELECT 1" > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+              echo "SQL Server is ready!"
+              break
+            fi
+            echo "Waiting 10 seconds..."
+            sleep 10
+          done
+
+      - name: Create test database
+        run: |
+          docker exec $(docker ps -qf "ancestor=mcr.microsoft.com/mssql/server:2022-latest") \
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Test@1234Pass!" -Q "IF DB_ID('TestDB') IS NULL CREATE DATABASE TestDB;"
+
+      - name: Run tSQLt tests
+        run: |
+          docker exec $(docker ps -qf "ancestor=mcr.microsoft.com/mssql/server:2022-latest") \
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "Test@1234Pass!" -d TestDB -Q "EXEC tSQLt.RunAll;"
+
+      - name: Show test results
+        run: echo "tSQLt tests finished!"

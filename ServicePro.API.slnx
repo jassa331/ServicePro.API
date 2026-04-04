@@ -3,4 +3,8 @@
   <Project Path="ServicePro.Core/ServicePro.Core.csproj" />
   <Project Path="ServicePro.Infrastructure/ServicePro.Infrastructure.csproj" />
   <Project Path="ServicePro.Services/ServicePro.Services.csproj" />
+  <Project Path="ServiceProDataBase/ServiceProDataBase.sqlproj" Id="ed220e98-e690-4630-8bfb-0e58f01b5758">
+    <Build />
+    <Deploy />
+  </Project>
 </Solution>

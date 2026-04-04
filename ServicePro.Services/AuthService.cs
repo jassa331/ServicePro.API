@@ -1,16 +1,15 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using BCrypt.Net;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using ServicePro.Core.DTOs;
 using ServicePro.Core.Entities;
 using ServicePro.Core.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Expressions;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
-
-
-using BCrypt.Net;
-using Microsoft.Extensions.Configuration;
-using System.Linq.Expressions;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ServicePro.Services
 {
@@ -18,13 +17,30 @@ namespace ServicePro.Services
     {
         private readonly IAuthRepository repository;
         private readonly IConfiguration config;
+        private readonly HttpClient _httpClient;
+
 
         public AuthService(IAuthRepository repository, IConfiguration config)
         {
             this.repository = repository;
             this.config = config;
-        }
+            _httpClient = new HttpClient();
 
+        }
+        private async Task<bool> VerifyCaptcha(string captchaResponse)
+        {
+            var secretKey = config["GoogleReCaptcha:SecretKey"];
+
+            var response = await _httpClient.PostAsync(
+                $"https://www.google.com/recaptcha/api/siteverify?secret={secretKey}&response={captchaResponse}",
+                null);
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+
+            dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(jsonString);
+
+            return result.success == true;
+        }
         public async Task RegisterAsync(RegisterRequestDto dto)
         {
             var user = new User
@@ -41,7 +57,13 @@ namespace ServicePro.Services
 
         public async Task<string> LoginAsync(LoginDto dto)
         {
-            try { 
+            // 1️⃣ Verify Captcha First
+            var isCaptchaValid = await VerifyCaptcha(dto.Captcha);
+
+            if (!isCaptchaValid)
+                throw new UnauthorizedAccessException("Captcha validation failed");
+
+            // 2️⃣ User Check
             var user = await repository.GetUserByEmailAsync(dto.Email);
 
             if (user == null)
@@ -50,15 +72,8 @@ namespace ServicePro.Services
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 throw new UnauthorizedAccessException("Invalid credentials");
 
+            // 3️⃣ Generate JWT
             return GenerateJwt(user);
-        
-            }
-
-            catch (Exception ex)
-            {
-                return ("something went wrong ");
-            }
-
         }
         private string GenerateJwt(User user)
         {
@@ -84,6 +99,16 @@ namespace ServicePro.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<User> GetProfileAsync(string email)
+        {
+            var user = await repository.GetUserByEmailAsync(email);
+
+            if (user == null)
+                throw new Exception("User not found");
+
+            return user;
         }
 
     }
