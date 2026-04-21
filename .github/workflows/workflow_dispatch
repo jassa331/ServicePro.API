@@ -1,0 +1,30 @@
+name: Manual DB Deploy
+
+on:
+  workflow_dispatch:   # 👈 sirf button click naal run hovega
+
+jobs:
+  deploy-db:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Build SQL Project
+      run: |
+        msbuild ServiceProDataBase/ServiceProDataBase.sqlproj
+
+    - name: Deploy DACPAC (Safe Update)
+      run: |
+        sqlpackage /Action:Publish \
+        /SourceFile:ServiceProDataBase/bin/Debug/ServiceProDataBase.dacpac \
+        /TargetServerName:localhost \
+        /TargetDatabaseName:TestDB \
+        /TargetUser:sa \
+        /TargetPassword:Your_password123 \
+        /p:BlockOnPossibleDataLoss=false \
+        /p:DropObjectsNotInSource=false
