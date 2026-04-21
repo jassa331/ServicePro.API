@@ -1,46 +1,37 @@
-name: Manual DB Deploy
+name: Manual DB Sync (Extract + Save)
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy-db:
+  sync-db:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout Repo
       uses: actions/checkout@v3
 
-    # ✅ Install SQLPackage (important for DACPAC deploy)
     - name: Install SQLPackage
       run: |
         choco install sqlpackage -y
 
-    # ✅ Setup MSBuild
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1
-
-    # ✅ Build SQL Project (with detailed logs)
-    - name: Build SQL Project
+    # Ensure folder exists
+    - name: Create Folder
       run: |
-        msbuild ServiceProDataBase/ServiceProDataBase.sqlproj /p:Configuration=Debug /v:detailed
+        mkdir database\scripts
 
-    # ✅ Check DACPAC file exists
-    - name: Verify DACPAC
+    # Extract DB → SQL file
+    - name: Generate SQL Script from DB
       run: |
-        dir ServiceProDataBase\bin\Debug
+        sqlpackage /Action:Script ^
+        /SourceConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" ^
+        /TargetFile:database/scripts/output.sql
 
-    # ✅ Deploy to Remote SQL Server (SAFE UPDATE)
-    - name: Deploy Database
+    # Commit changes
+    - name: Commit and Push
       run: |
-        sqlpackage /Action:Publish ^
-        /SourceFile:ServiceProDataBase/bin/Debug/ServiceProDataBase.dacpac ^
-        /TargetConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" ^
-        /p:BlockOnPossibleDataLoss=false ^
-        /p:DropObjectsNotInSource=false ^
-        /p:CreateNewDatabase=false
-
-    # ✅ Optional: Verify Tables
-    - name: Verify DB Tables
-      run: |
-        sqlcmd -S 188.40.211.8 -U db43502 -P "${{ secrets.DB_PASSWORD }}" -d db43502 -Q "SELECT name FROM sys.tables"
+        git config --global user.name "github-actions"
+        git config --global user.email "actions@github.com"
+        git add .
+        git commit -m "Auto DB Sync - Updated SQL Script" || echo "No changes"
+        git push
