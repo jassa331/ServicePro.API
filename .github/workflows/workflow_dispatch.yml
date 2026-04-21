@@ -15,14 +15,14 @@ jobs:
       run: |
         choco install sqlpackage -y
 
-    - name: Generate SQL Script from DB
+    - name: Extract DB to DACPAC
       run: |
-        sqlpackage /Action:Script /SourceConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" /OutputPath:database/scripts/output.sql
+        sqlpackage /Action:Extract /SourceConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" /TargetFile:database/scripts/output.dacpac
 
     - name: Commit and Push
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "actions@github.com"
         git add .
-        git commit -m "Auto DB Sync - Updated SQL Script" || echo "No changes"
+        git commit -m "Auto DB Backup - DACPAC" || echo "No changes"
         git push
