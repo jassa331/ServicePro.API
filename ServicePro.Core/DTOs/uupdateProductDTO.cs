@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace ServicePro.Core.DTOs
 {
+    //
     public class UpdateSingleImageDTO
     {
         public Guid ProductId { get; set; }
