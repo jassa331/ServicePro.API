@@ -17,9 +17,7 @@ jobs:
 
     - name: Generate SQL Script from DB
       run: |
-        sqlpackage /Action:Script ^
-        /SourceConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" ^
-        /TargetFile:database/scripts/output.sql
+        sqlpackage /Action:Script /SourceConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" /TargetFile:database/scripts/output.sql
 
     - name: Commit and Push
       run: |
