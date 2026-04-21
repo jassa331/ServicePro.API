@@ -2,7 +2,8 @@ name: Manual DB Sync (Extract + Save)
 
 on:
   workflow_dispatch:
-
+permissions:
+  contents: write
 jobs:
   sync-db:
     runs-on: windows-latest
