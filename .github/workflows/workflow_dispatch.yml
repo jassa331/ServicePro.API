@@ -15,19 +15,12 @@ jobs:
       run: |
         choco install sqlpackage -y
 
-    # Ensure folder exists
-    - name: Create Folder
-      run: |
-        mkdir database\scripts
-
-    # Extract DB → SQL file
     - name: Generate SQL Script from DB
       run: |
         sqlpackage /Action:Script ^
         /SourceConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" ^
         /TargetFile:database/scripts/output.sql
 
-    # Commit changes
     - name: Commit and Push
       run: |
         git config --global user.name "github-actions"
