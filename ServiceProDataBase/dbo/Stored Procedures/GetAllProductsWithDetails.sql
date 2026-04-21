@@ -9,6 +9,7 @@ BEGIN
         p.Category,
         p.Description,
         --alter
+        --jassatst
         -- Images
         pi.Id AS ImageId,
         pi.ProductId,
