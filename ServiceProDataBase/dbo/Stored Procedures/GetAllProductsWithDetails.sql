@@ -15,7 +15,7 @@ BEGIN
         pi.ImageUrl,
         pi.PublicId,
         pi.CreatedAt,
-
+        --testthfhfh
         -- Variants
         pv.Id AS VariantId,
         pv.Weight,
