@@ -23,7 +23,6 @@ jobs:
       run: |
         sqlpackage /Action:Extract /SourceConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" /TargetFile:database/scripts/output.dacpac
 
-    # ❗ ONLY THIS STEP (NO git push)
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:
@@ -32,4 +31,3 @@ jobs:
         body: Automated database backup update
         branch: db-sync-branch
         base: master
-        push-to-fork: true
