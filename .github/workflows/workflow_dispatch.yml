@@ -32,3 +32,4 @@ jobs:
         body: Automated database backup update
         branch: db-sync-branch
         base: master
+        push-to-fork: true
