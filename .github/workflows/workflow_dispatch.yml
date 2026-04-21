@@ -1,7 +1,7 @@
 name: Manual DB Deploy
 
 on:
-  workflow_dispatch:   # 👈 sirf button click naal run hovega
+  workflow_dispatch:
 
 jobs:
   deploy-db:
@@ -11,20 +11,36 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # ✅ Install SQLPackage (important for DACPAC deploy)
+    - name: Install SQLPackage
+      run: |
+        choco install sqlpackage -y
+
+    # ✅ Setup MSBuild
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
 
+    # ✅ Build SQL Project (with detailed logs)
     - name: Build SQL Project
       run: |
-        msbuild ServiceProDataBase/ServiceProDataBase.sqlproj
+        msbuild ServiceProDataBase/ServiceProDataBase.sqlproj /p:Configuration=Debug /v:detailed
 
-    - name: Deploy DACPAC (Safe Update)
+    # ✅ Check DACPAC file exists
+    - name: Verify DACPAC
       run: |
-        sqlpackage /Action:Publish \
-        /SourceFile:ServiceProDataBase/bin/Debug/ServiceProDataBase.dacpac \
-        /TargetServerName:localhost \
-        /TargetDatabaseName:TestDB \
-        /TargetUser:sa \
-        /TargetPassword:Your_password123 \
-        /p:BlockOnPossibleDataLoss=false \
-        /p:DropObjectsNotInSource=false
+        dir ServiceProDataBase\bin\Debug
+
+    # ✅ Deploy to Remote SQL Server (SAFE UPDATE)
+    - name: Deploy Database
+      run: |
+        sqlpackage /Action:Publish ^
+        /SourceFile:ServiceProDataBase/bin/Debug/ServiceProDataBase.dacpac ^
+        /TargetConnectionString:"${{ secrets.DB_CONNECTION_STRING }}" ^
+        /p:BlockOnPossibleDataLoss=false ^
+        /p:DropObjectsNotInSource=false ^
+        /p:CreateNewDatabase=false
+
+    # ✅ Optional: Verify Tables
+    - name: Verify DB Tables
+      run: |
+        sqlcmd -S 188.40.211.8 -U db43502 -P "${{ secrets.DB_PASSWORD }}" -d db43502 -Q "SELECT name FROM sys.tables"
